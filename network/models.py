@@ -7,11 +7,14 @@ class User(AbstractUser):
 
 
 class Following(models.Model):
-    user = models.ManyToManyField(User, related_name="following")
-    following = models.ManyToManyField(User, related_name="followers")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following")
+    following = models.ManyToManyField(User, related_name="followers", symmetrical=False)
 
     def __str__(self):
-        return f"{self.user} follows {self.following}"
+        # get a list of all the users that the current user is following
+
+        following = ", ".join([user.username for user in self.following.all()])
+        return f"{self.user} follows {following}"
 
 
 class Post(models.Model):
@@ -19,6 +22,7 @@ class Post(models.Model):
     content = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     likes = models.ManyToManyField(User, blank=True, related_name="liked_posts")
+
 
     def __str__(self):
         return f"{self.user} {self.timestamp.strftime('%b %d %Y, %I:%M %p')}"
